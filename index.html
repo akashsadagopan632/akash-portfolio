@@ -1,181 +1,221 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Akash S - Portfolio</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/ScrollTrigger.min.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="font-inter text-gray-100 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500">
-  <!-- Sidebar Navigation -->
-  <nav class="fixed top-0 left-0 h-full w-64 bg-gray-900 bg-opacity-90 shadow-lg flex flex-col justify-between p-6">
-    <div>
-      <h1 class="text-2xl font-bold text-blue-300">Akash S</h1>
-      <p class="text-sm text-gray-300 mt-2">Full Stack Developer</p>
-      <ul class="mt-10 space-y-4">
-        <li><a href="#about" class="text-gray-200 hover:text-blue-300 transition">About</a></li>
-        <li><a href="#skills" class="text-gray-200 hover:text-blue-300 transition">Skills</a></li>
-        <li><a href="#projects" class="text-gray-200 hover:text-blue-300 transition">Projects</a></li>
-        <li><a href="#experience" class="text-gray-200 hover:text-blue-300 transition">Experience</a></li>
-        <li><a href="#contact" class="text-gray-200 hover:text-blue-300 transition">Contact</a></li>
+<body class="font-inter text-white min-h-screen relative">
+  <!-- Animated Particle Background -->
+  <canvas id="particle-bg" class="fixed inset-0 z-0"></canvas>
+
+  <!-- Sticky Header Navigation -->
+  <header class="sticky top-0 bg-teal-900 bg-opacity-80 shadow-lg z-20 backdrop-blur-md">
+    <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl font-bold text-orange-400">Akash S</h1>
+      </div>
+      <ul class="flex space-x-6">
+        <li><a href="#skills" class="text-white hover:text-orange-300 transition">Skills</a></li>
+        <li><a href="#experience" class="text-white hover:text-orange-300 transition">Core Experience</a></li>
+        <li><a href="#projects" class="text-white hover:text-orange-300 transition">Projects</a></li>
+        <li><a href="#work" class="text-white hover:text-orange-300 transition">Experience</a></li>
+        <li><a href="#contact" class="text-white hover:text-orange-300 transition">Contact</a></li>
       </ul>
-    </div>
-    <div class="text-gray-300 text-sm">
-      <p>© 2025 Akash S</p>
-    </div>
-  </nav>
+    </nav>
+  </header>
 
   <!-- Main Content -->
-  <main class="ml-64 p-8">
-    <section id="about" class="min-h-screen flex items-center py-16">
-      <div class="container mx-auto px-4">
-        <h2 class="text-4xl font-bold text-white mb-6">About Me</h2>
-        <div class="bg-gray-900 bg-opacity-80 p-8 rounded-xl shadow-2xl backdrop-blur-sm">
-          <p class="text-lg leading-relaxed text-gray-200">
-            I'm a software developer with 1.5+ years of hands-on experience in Angular, Node.js, Spring Boot, and RESTful APIs. Passionate about building scalable applications and modern UIs.
-          </p>
+  <div class="flex flex-col md:flex-row relative z-10">
+    <!-- Sidebar (Profile Section) -->
+    <aside class="w-full md:w-1/3 bg-teal-800 p-6 md:p-8 border-r border-orange-400">
+      <div class="text-center">
+        <div class="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-orange-400 mb-4">
+          <img src="https://via.placeholder.com/150" alt="Akash S Profile" class="w-full h-full object-cover">
+        </div>
+        <h1 class="text-2xl font-bold text-white">Akash S</h1>
+        <p class="text-orange-300 text-sm mb-2">Full Stack Developer</p>
+        <p class="text-gray-200 text-sm mb-2">1.5+ years building scalable apps and modern UIs</p>
+        <p class="text-gray-200 text-sm mb-2">📧 <a href="mailto:akashonedeveloper@gmail.com" class="hover:text-orange-300 transition">akashonedeveloper@gmail.com</a></p>
+        <p class="text-gray-200 text-sm mb-2">📍 Chennai, Tamil Nadu</p>
+        <p class="text-gray-200 text-sm">📞 +91 80568 47245</p>
+        <div class="mt-4 flex justify-center space-x-4">
+          <a href="#" class="text-gray-200 hover:text-orange-300"><i class="fab fa-github"></i></a>
+          <a href="#" class="text-gray-200 hover:text-orange-300"><i class="fab fa-linkedin"></i></a>
         </div>
       </div>
-    </section>
+    </aside>
 
-    <section id="skills" class="min-h-screen flex items-center py-16 bg-gradient-to-b from-transparent to-blue-700">
-      <div class="container mx-auto px-4">
-        <h2 class="text-4xl font-bold text-white mb-6">Skills</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          <div class="skill-card bg-gray-900 bg-opacity-80 p-6 rounded-xl shadow-2xl backdrop-blur-sm transform transition hover:scale-105 hover:bg-blue-800">Angular 16</div>
-          <div class="skill-card bg-gray-900 bg-opacity-80 p-6 rounded-xl shadow-2xl backdrop-blur-sm transform transition hover:scale-105 hover:bg-blue-800">Node.js & Express</div>
-          <div class="skill-card bg-gray-900 bg-opacity-80 p-6 rounded-xl shadow-2xl backdrop-blur-sm transform transition hover:scale-105 hover:bg-blue-800">Spring Boot</div>
-          <div class="skill-card bg-gray-900 bg-opacity-80 p-6 rounded-xl shadow-2xl backdrop-blur-sm transform transition hover:scale-105 hover:bg-blue-800">MySQL</div>
-          <div class="skill-card bg-gray-900 bg-opacity-80 p-6 rounded-xl shadow-2xl backdrop-blur-sm transform transition hover:scale-105 hover:bg-blue-800">HTML5, CSS3, Bootstrap</div>
+    <!-- Main Content Sections -->
+    <main class="w-full md:w-2/3 p-6 md:p-8">
+      <section id="skills" class="bg-teal-800 p-4 rounded mb-8">
+        <h2 class="text-white font-semibold text-xl mb-4">Core Skills</h2>
+        <div class="grid grid-cols-2 gap-2">
+          <div class="bg-teal-700 p-2 rounded text-sm hover:bg-orange-500 transition shadow-orange">Angular 16</div>
+          <div class="bg-teal-700 p-2 rounded text-sm hover:bg-orange-500 transition shadow-orange">Node.js & Express</div>
+          <div class="bg-teal-700 p-2 rounded text-sm hover:bg-orange-500 transition shadow-orange">Spring Boot</div>
+          <div class="bg-teal-700 p-2 rounded text-sm hover:bg-orange-500 transition shadow-orange">MySQL</div>
+          <div class="bg-teal-700 p-2 rounded text-sm hover:bg-orange-500 transition shadow-orange">HTML5, CSS3, Bootstrap</div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section id="projects" class="min-h-screen flex items-center py-16">
-      <div class="container mx-auto px-4">
-        <h2 class="text-4xl font-bold text-white mb-6">Projects</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="project-card bg-gray-900 bg-opacity-80 p-8 rounded-xl shadow-2xl backdrop-blur-sm transform transition hover:shadow-2xl hover:bg-blue-800">
-            <h3 class="text-2xl font-semibold text-blue-300">PAAS Diet App</h3>
-            <p class="mt-4 text-gray-200">Hospital dietary management system built using Angular, Node.js, and MySQL. Includes KOT, reports, and patient order tracking.</p>
-          </div>
-          <div class="project-card bg-gray-900 bg-opacity-80 p-8 rounded-xl shadow-2xl backdrop-blur-sm transform transition hover:shadow-2xl hover:bg-blue-800">
-            <h3 class="text-2xl font-semibold text-blue-300">SmartOrder Web App</h3>
-            <p class="mt-4 text-gray-200">A web application to take and track restaurant orders. Uses Angular, Node.js, and RESTful APIs.</p>
-          </div>
+      <section id="experience" class="bg-teal-800 p-4 rounded mb-8">
+        <h2 class="text-white font-semibold text-xl mb-4">Core Experience</h2>
+        <div class="grid grid-cols-2 gap-2">
+          <div class="bg-teal-700 p-2 rounded text-sm hover:bg-orange-500 transition shadow-orange">Angular/Node Development</div>
+          <div class="bg-teal-700 p-2 rounded text-sm hover:bg-orange-500 transition shadow-orange">REST API Design</div>
+          <div class="bg-teal-700 p-2 rounded text-sm hover:bg-orange-500 transition shadow-orange">SQL Integration</div>
+          <div class="bg-teal-700 p-2 rounded text-sm hover:bg-orange-500 transition shadow-orange">Billing Systems</div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section id="experience" class="min-h-screen flex items-center py-16 bg-gradient-to-b from-transparent to-purple-700">
-      <div class="container mx-auto px-4">
-        <h2 class="text-4xl font-bold text-white mb-6">Experience</h2>
-        <div class="bg-gray-900 bg-opacity-80 p-8 rounded-xl shadow-2xl backdrop-blur-sm">
-          <h3 class="text-2xl font-semibold text-blue-300">Ciarss Software Solutions – Software Developer</h3>
-          <p class="text-gray-300">Aug 2023 – Present</p>
-          <ul class="mt-4 text-gray-200 list-disc list-inside">
-            <li>Developed high-performance Angular/Node apps</li>
-            <li>Worked on REST APIs, SQL integration, and billing systems</li>
-          </ul>
-        </div>
-      </div>
-    </section>
+      <section id="projects" class="bg-teal-800 p-4 rounded mb-8">
+        <h2 class="text-white font-semibold text-xl mb-4">Projects</h2>
+        <ul class="space-y-4">
+          <li class="bg-teal-700 p-4 rounded hover:bg-orange-500 transition shadow-orange">
+            <h3 class="text-md font-medium">PAAS Diet App</h3>
+            <p class="text-sm text-gray-200">Hospital dietary management system built using Angular, Node.js, and MySQL. Includes KOT, reports, and patient order tracking.</p>
+          </li>
+          <li class="bg-teal-700 p-4 rounded hover:bg-orange-500 transition shadow-orange">
+            <h3 class="text-md font-medium">SmartOrder Web App</h3>
+            <p class="text-sm text-gray-200">A web application to take and track restaurant orders. Uses Angular, Node.js, and RESTful APIs.</p>
+          </li>
+        </ul>
+      </section>
 
-    <section id="contact" class="min-h-screen flex items-center py-16">
-      <div class="container mx-auto px-4">
-        <h2 class="text-4xl font-bold text-white mb-6">Contact</h2>
-        <div class="bg-gray-900 bg-opacity-80 p-8 rounded-xl shadow-2xl backdrop-blur-sm">
-          <p class="text-lg mb-4">
-            📧 <a href="mailto:akashsadagopan632@gmail.com?subject=Contact%20from%20Portfolio&body=Hello%20Akash,%20I%20am%20reaching%20out%20regarding..." class="text-blue-300 hover:text-blue-200 transition">akashonedeveloper@gmail.com</a>
-          </p>
-          <p class="text-lg mb-4">📍 Chennai, Tamil Nadu</p>
-          <p class="text-lg">📞 +91 8608447345</p>
+      <section id="work" class="bg-teal-800 p-4 rounded mb-8">
+        <h2 class="text-white font-semibold text-xl mb-4">Experience</h2>
+        <ul class="space-y-4">
+          <li class="bg-teal-700 p-4 rounded hover:bg-orange-500 transition shadow-orange">
+            <h3 class="text-md font-medium">Ciarss Software Solutions – Software Developer</h3>
+            <p class="text-sm text-gray-200">Aug 2023 – Present</p>
+            <ul class="mt-2 text-sm text-gray-300 list-disc list-inside">
+              <li>Developed high-performance Angular/Node apps</li>
+              <li>Worked on REST APIs, SQL integration, and billing systems</li>
+            </ul>
+          </li>
+        </ul>
+      </section>
+
+      <section id="contact" class="bg-teal-800 p-4 rounded mb-8">
+        <h2 class="text-white font-semibold text-xl mb-4">Contact</h2>
+        <div class="bg-teal-700 p-4 rounded shadow-orange">
+          <p class="text-sm text-gray-200">📧 <a href="mailto:akashonedeveloper@gmail.com" class="hover:text-orange-300 transition">akashonedeveloper@gmail.com</a></p>
+          <p class="text-sm text-gray-200">📍 Chennai, Tamil Nadu</p>
+          <p class="text-sm text-gray-200">📞 +91 80568 47245</p>
         </div>
-      </div>
-    </section>
-  </main>
+      </section>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-teal-900 p-4 text-center text-gray-200 relative z-10">
+    <p>© 2025 Akash S. All rights reserved. | Last Updated: 07:24 PM IST, Tuesday, July 15, 2025</p>
+  </footer>
 
   <script>
+    // Particle Background
+    const canvas = document.getElementById('particle-bg');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles = [];
+    const particleCount = 100;
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 5 + 1;
+        this.speedX = Math.random() * 1 - 0.5;
+        this.speedY = Math.random() * 1 - 0.5;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if (this.size > 0.2) this.size -= 0.1;
+      }
+      draw() {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function initParticles() {
+      for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+      }
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update();
+        particles[i].draw();
+        if (particles[i].size <= 0.2) {
+          particles.splice(i, 1);
+          i--;
+          particles.push(new Particle());
+        }
+      }
+      requestAnimationFrame(animateParticles);
+    }
+
+    initParticles();
+    animateParticles();
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
     // GSAP Animations
     gsap.registerPlugin(ScrollTrigger);
 
-    // Animate sidebar
-    gsap.from("nav", {
-      x: -64,
+    // Animate header
+    gsap.from("header", {
+      y: -50,
       opacity: 0,
       duration: 1,
       ease: "power3.out"
     });
 
-    // Animate sections on scroll
+    // Animate sidebar on load
+    gsap.from("aside", {
+      x: -200,
+      opacity: 0,
+      duration: 1,
+      ease: "power3.out"
+    });
+
+    // Animate main content sections on scroll
     gsap.utils.toArray("section").forEach((section) => {
       gsap.from(section, {
         opacity: 0,
-        y: 100,
+        y: 50,
         duration: 1,
         scrollTrigger: {
           trigger: section,
           start: "top 80%",
-          end: "bottom 20%",
           toggleActions: "play none none reverse"
         }
       });
     });
 
-    // Animate project and skill cards
-    gsap.utils.toArray(".project-card, .skill-card").forEach((card) => {
-      gsap.from(card, {
-        opacity: 0,
-        x: -50,
-        duration: 0.8,
-        scrollTrigger: {
-          trigger: card,
-          start: "top 90%",
-          toggleActions: "play none none reverse"
-        }
+    // Animate list items and cards on hover
+    gsap.utils.toArray(".hover\\:bg-orange-500").forEach((item) => {
+      item.addEventListener("mouseenter", () => {
+        gsap.to(item, { scale: 1.02, duration: 0.3, boxShadow: "0 0 15px #f97316" });
+      });
+      item.addEventListener("mouseleave", () => {
+        gsap.to(item, { scale: 1, duration: 0.3, boxShadow: "none" });
       });
     });
   </script>
