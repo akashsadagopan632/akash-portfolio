@@ -1,70 +1,183 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
 
-<!DOCTYPE html>
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Akash S | Portfolio</title>
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
-  <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Akash S - Portfolio</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
-
-  <header>
-    <div class="container">
-      <h1>Akash S</h1>
-      <p>Full Stack Developer | Angular • Node.js • Java</p>
+<body class="font-inter text-gray-100 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500">
+  <!-- Sidebar Navigation -->
+  <nav class="fixed top-0 left-0 h-full w-64 bg-gray-900 bg-opacity-90 shadow-lg flex flex-col justify-between p-6">
+    <div>
+      <h1 class="text-2xl font-bold text-blue-300">Akash S</h1>
+      <p class="text-sm text-gray-300 mt-2">Full Stack Developer</p>
+      <ul class="mt-10 space-y-4">
+        <li><a href="#about" class="text-gray-200 hover:text-blue-300 transition">About</a></li>
+        <li><a href="#skills" class="text-gray-200 hover:text-blue-300 transition">Skills</a></li>
+        <li><a href="#projects" class="text-gray-200 hover:text-blue-300 transition">Projects</a></li>
+        <li><a href="#experience" class="text-gray-200 hover:text-blue-300 transition">Experience</a></li>
+        <li><a href="#contact" class="text-gray-200 hover:text-blue-300 transition">Contact</a></li>
+      </ul>
     </div>
-  </header>
-
-  <section id="about">
-    <h2>About Me</h2>
-    <p>I'm a software developer with 1.5+ years of hands-on experience in Angular, Node.js, Spring Boot, and RESTful APIs. Passionate about building scalable applications and modern UIs.</p>
-  </section>
-
-  <section id="skills">
-    <h2>Skills</h2>
-    <ul>
-      <li>Angular 16</li>
-      <li>Node.js & Express</li>
-      <li>Spring Boot</li>
-      <li>MySQL</li>
-      <li>HTML5, CSS3, Bootstrap</li>
-    </ul>
-  </section>
-
-  <section id="projects">
-    <h2>Projects</h2>
-    <div class="project-card">
-      <h3>PAAS Diet App</h3>
-      <p>Hospital dietary management system built using Angular, Node.js, and MySQL. Includes KOT, reports, and patient order tracking.</p>
+    <div class="text-gray-300 text-sm">
+      <p>© 2025 Akash S</p>
     </div>
-    <div class="project-card">
-      <h3>SmartOrder Web App</h3>
-      <p>A web application to take and track restaurant orders. Uses Angular, Node.js, and RESTful APIs.</p>
-    </div>
-  </section>
+  </nav>
 
-  <section id="experience">
-    <h2>Experience</h2>
-    <p><strong>Ciarss Software Solutions</strong> – Software Developer (Aug 2023 – Present)</p>
-    <ul>
-      <li>Developed high-performance Angular/Node apps</li>
-      <li>Worked on REST APIs, SQL integration, and billing systems</li>
-    </ul>
-  </section>
+  <!-- Main Content -->
+  <main class="ml-64 p-8">
+    <section id="about" class="min-h-screen flex items-center py-16">
+      <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-white mb-6">About Me</h2>
+        <div class="bg-gray-900 bg-opacity-80 p-8 rounded-xl shadow-2xl backdrop-blur-sm">
+          <p class="text-lg leading-relaxed text-gray-200">
+            I'm a software developer with 1.5+ years of hands-on experience in Angular, Node.js, Spring Boot, and RESTful APIs. Passionate about building scalable applications and modern UIs.
+          </p>
+        </div>
+      </div>
+    </section>
 
-  <section id="contact">
-    <h2>Contact</h2>
-    <p><i class="fas fa-envelope"></i> akashonedeveloper@gmail.com</p>
-    <p><i class="fas fa-map-marker-alt"></i> Chennai, Tamil Nadu</p>
-    <p><i class="fas fa-phone"></i> +91 80568 47245</p>
-  </section>
+    <section id="skills" class="min-h-screen flex items-center py-16 bg-gradient-to-b from-transparent to-blue-700">
+      <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-white mb-6">Skills</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <div class="skill-card bg-gray-900 bg-opacity-80 p-6 rounded-xl shadow-2xl backdrop-blur-sm transform transition hover:scale-105 hover:bg-blue-800">Angular 16</div>
+          <div class="skill-card bg-gray-900 bg-opacity-80 p-6 rounded-xl shadow-2xl backdrop-blur-sm transform transition hover:scale-105 hover:bg-blue-800">Node.js & Express</div>
+          <div class="skill-card bg-gray-900 bg-opacity-80 p-6 rounded-xl shadow-2xl backdrop-blur-sm transform transition hover:scale-105 hover:bg-blue-800">Spring Boot</div>
+          <div class="skill-card bg-gray-900 bg-opacity-80 p-6 rounded-xl shadow-2xl backdrop-blur-sm transform transition hover:scale-105 hover:bg-blue-800">MySQL</div>
+          <div class="skill-card bg-gray-900 bg-opacity-80 p-6 rounded-xl shadow-2xl backdrop-blur-sm transform transition hover:scale-105 hover:bg-blue-800">HTML5, CSS3, Bootstrap</div>
+        </div>
+      </div>
+    </section>
 
-  <footer>
-    <p>© 2025 Akash S. All rights reserved.</p>
-  </footer>
+    <section id="projects" class="min-h-screen flex items-center py-16">
+      <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-white mb-6">Projects</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="project-card bg-gray-900 bg-opacity-80 p-8 rounded-xl shadow-2xl backdrop-blur-sm transform transition hover:shadow-2xl hover:bg-blue-800">
+            <h3 class="text-2xl font-semibold text-blue-300">PAAS Diet App</h3>
+            <p class="mt-4 text-gray-200">Hospital dietary management system built using Angular, Node.js, and MySQL. Includes KOT, reports, and patient order tracking.</p>
+          </div>
+          <div class="project-card bg-gray-900 bg-opacity-80 p-8 rounded-xl shadow-2xl backdrop-blur-sm transform transition hover:shadow-2xl hover:bg-blue-800">
+            <h3 class="text-2xl font-semibold text-blue-300">SmartOrder Web App</h3>
+            <p class="mt-4 text-gray-200">A web application to take and track restaurant orders. Uses Angular, Node.js, and RESTful APIs.</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
+    <section id="experience" class="min-h-screen flex items-center py-16 bg-gradient-to-b from-transparent to-purple-700">
+      <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-white mb-6">Experience</h2>
+        <div class="bg-gray-900 bg-opacity-80 p-8 rounded-xl shadow-2xl backdrop-blur-sm">
+          <h3 class="text-2xl font-semibold text-blue-300">Ciarss Software Solutions – Software Developer</h3>
+          <p class="text-gray-300">Aug 2023 – Present</p>
+          <ul class="mt-4 text-gray-200 list-disc list-inside">
+            <li>Developed high-performance Angular/Node apps</li>
+            <li>Worked on REST APIs, SQL integration, and billing systems</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="min-h-screen flex items-center py-16">
+      <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-white mb-6">Contact</h2>
+        <div class="bg-gray-900 bg-opacity-80 p-8 rounded-xl shadow-2xl backdrop-blur-sm">
+          <p class="text-lg mb-4">
+            📧 <a href="mailto:akashonedeveloper@gmail.com?subject=Contact%20from%20Portfolio&body=Hello%20Akash,%20I%20am%20reaching%20out%20regarding..." class="text-blue-300 hover:text-blue-200 transition">akashonedeveloper@gmail.com</a>
+          </p>
+          <p class="text-lg mb-4">📍 Chennai, Tamil Nadu</p>
+          <p class="text-lg">📞 +91 8608447345</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // GSAP Animations
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Animate sidebar
+    gsap.from("nav", {
+      x: -64,
+      opacity: 0,
+      duration: 1,
+      ease: "power3.out"
+    });
+
+    // Animate sections on scroll
+    gsap.utils.toArray("section").forEach((section) => {
+      gsap.from(section, {
+        opacity: 0,
+        y: 100,
+        duration: 1,
+        scrollTrigger: {
+          trigger: section,
+          start: "top 80%",
+          end: "bottom 20%",
+          toggleActions: "play none none reverse"
+        }
+      });
+    });
+
+    // Animate project and skill cards
+    gsap.utils.toArray(".project-card, .skill-card").forEach((card) => {
+      gsap.from(card, {
+        opacity: 0,
+        x: -50,
+        duration: 0.8,
+        scrollTrigger: {
+          trigger: card,
+          start: "top 90%",
+          toggleActions: "play none none reverse"
+        }
+      });
+    });
+  </script>
 </body>
 </html>
