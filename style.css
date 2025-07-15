@@ -3,8 +3,8 @@ body {
   margin: 0;
   background: linear-gradient(135deg, #3b82f6, #9333ea, #ec4899);
   background-size: 200% 200%;
-  animation: gradientAnimation 15s ease infinite;
-  color: #e5e7eb;
+  animation: gradientAnimation 10s ease infinite;
+  color: #ffffff;
 }
 
 @keyframes gradientAnimation {
@@ -13,8 +13,17 @@ body {
   100% { background-position: 0% 50%; }
 }
 
-nav {
-  background: rgba(17, 24, 39, 0.9);
+#particle-bg {
+  opacity: 0.3;
+}
+
+header {
+  transition: background-color 0.3s ease;
+}
+
+header.scrolled {
+  background: rgba(59, 130, 246, 0.95);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 nav a {
@@ -28,7 +37,7 @@ nav a::after {
   left: 0;
   width: 0;
   height: 2px;
-  background-color: #60a5fa;
+  background-color: #f97316;
   transition: width 0.3s ease;
 }
 
@@ -39,16 +48,17 @@ nav a:hover::after {
 h2 {
   position: relative;
   display: inline-block;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 h2::after {
   content: '';
   position: absolute;
-  bottom: -8px;
+  bottom: -4px;
   left: 0;
-  width: 50%;
-  height: 3px;
-  background-color: #60a5fa;
+  width: 0;
+  height: 2px;
+  background-color: #f97316;
   transition: width 0.3s ease;
 }
 
@@ -56,36 +66,52 @@ h2:hover::after {
   width: 100%;
 }
 
-.project-card, .skill-card {
-  border-left: 4px solid #60a5fa;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+.bg-teal-700 {
+  background-color: #0f766e;
 }
 
-.project-card:hover, .skill-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+.bg-teal-800 {
+  background-color: #115e59;
+}
+
+.bg-teal-900 {
+  background-color: #134e4a;
+}
+
+.hover\:bg-orange-500:hover {
+  background-color: #f97316;
+  transition: background-color 0.3s ease;
+}
+
+.text-orange-300 {
+  color: #fdba74;
+}
+
+.text-orange-400 {
+  color: #fb923c;
+}
+
+.border-orange-400 {
+  border-color: #fb923c;
+}
+
+.shadow-orange {
+  box-shadow: 0 0 10px #f97316;
 }
 
 @media (max-width: 768px) {
-  nav {
+  .flex-col {
+    flex-direction: column;
+  }
+  aside, main {
     width: 100%;
-    height: auto;
-    position: fixed;
-    top: 0;
-    left: 0;
-    flex-direction: row;
-    justify-content: space-around;
-    padding: 1rem;
-    z-index: 10;
   }
-  main {
-    margin-left: 0;
-    padding-top: 80px;
-  }
-  h1 {
-    font-size: 1.5rem;
+  header nav ul {
+    flex-direction: column;
+    space-y-4;
+    align-items: center;
   }
   section {
-    padding: 20px 10px;
+    padding: 10px;
   }
 }
